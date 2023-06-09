@@ -23,6 +23,8 @@ public class EnemyPathfinding : MonoBehaviour
 		  walkSpeed;
 
 	float idleTimer;
+	float StunTimer;
+	bool HitStuned = false;
 	[SerializeField] Vector3 GeneratedNavPoint;
 
 
@@ -181,45 +183,6 @@ public class EnemyPathfinding : MonoBehaviour
 			instance.animC.ResetTrigger("Walk");
 		}
 	}
-	/* chase state
-	 * chase the player when it gets in detection range
-	 * becomes the default state when the object is picked up
-	 */
-	public class ChaseState : EnemyMoveState
-	{
-		public ChaseState(EnemyPathfinding _instance) : base(_instance)
-		{
-		}
-
-		public override void OnEnter()
-		{
-			Debug.Log("Entering Chase State!");
-			instance.agent.isStopped = false;
-
-			instance.agent.speed = instance.runSpeed;
-
-			instance.animC.SetTrigger("Run");
-		}
-
-		public override void OnUpdate()
-		{
-			if (Vector3.Distance(instance.transform.position, instance.player.transform.position) < instance.detectionDistance)
-			{
-				instance.agent.SetDestination(instance.player.transform.position);
-			}
-			else
-			{
-				instance.StateMachine.SetState(new IdleState(instance));
-			}
-		}
-
-		public override void OnExit()
-		{
-			instance.animC.ResetTrigger("Run");
-		}
-
-	}
-	
 	/* patrol state
 	 * chase player if in range
 	 * move between different patrol points that are pre determined IN ORDER
@@ -268,6 +231,94 @@ public class EnemyPathfinding : MonoBehaviour
 		}
 
 	}
+	/* chase state
+	 * chase the player when it gets in detection range
+	 * becomes the default state when the object is picked up
+	 * if interacted with enters the stun state
+	 */
+	public class ChaseState : EnemyMoveState
+	{
+		public ChaseState(EnemyPathfinding _instance) : base(_instance)
+		{
+		}
+
+		public override void OnEnter()
+		{
+			Debug.Log("Entering Chase State!");
+			instance.agent.isStopped = false;
+
+			instance.agent.speed = instance.runSpeed;
+
+			instance.animC.SetTrigger("Run");
+		}
+
+		public override void OnUpdate()
+		{
+			if (Vector3.Distance(instance.transform.position, instance.player.transform.position) < instance.detectionDistance)
+			{
+				instance.agent.SetDestination(instance.player.transform.position);
+			}
+			else if (instance.HitStuned)
+			{
+				instance.StateMachine.SetState(new StunState(instance));
+			}
+			else
+			{
+				instance.StateMachine.SetState(new IdleState(instance));
+			}
+		}
+
+		public override void OnExit()
+		{
+			instance.animC.ResetTrigger("Run");
+		}
+
+	}
+	/* stun state
+	 * if interacted with will enter the stun state
+	 * stop for 3.5 seconds 
+	 * will trasition back to default state
+	 */
+	public class StunState : EnemyMoveState
+	{
+		public StunState(EnemyPathfinding _instance) : base(_instance)
+		{
+		}
+
+		public override void OnEnter()
+		{
+			Debug.Log("Entering Stun State!");
+			instance.agent.isStopped = true;
+
+			instance.animC.SetTrigger("Stun");
+			instance.StunTimer = 3.5f;
+			Debug.Log(instance.idleTimer);
+		}
+
+		public override void OnUpdate()
+		{
+			if (instance.StunTimer <= 0)
+			{
+				instance.StateMachine.SetState(new IdleState(instance));
+			}
+			else if (instance.StunTimer > 0)
+			{
+				instance.StunTimer -= 1 * Time.deltaTime;
+			}
+		}
+
+		public override void OnExit()
+		{
+			instance.animC.ResetTrigger("Stun");
+		}
+	}
+
+
+
+
+
+
+
 
 	public Vector3 RandomNavmeshLocation(float radius)  // generates a random point on the nav mesh by creating a random postion in a sphere around the agent
 	{
