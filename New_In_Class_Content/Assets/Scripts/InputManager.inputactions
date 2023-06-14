@@ -1,0 +1,56 @@
+{
+    "name": "InputManager",
+    "maps": [
+        {
+            "name": "Player",
+            "id": "14ed51ad-08ff-4a86-9a47-a447934c3a70",
+            "actions": [
+                {
+                    "name": "Camera",
+                    "type": "Value",
+                    "id": "1beec92f-d498-4aff-8f67-6d2b45ddc0c0",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "942bb661-7666-4966-83ec-533c2a3affcd",
+                    "path": "<Gamepad>/rightStick",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Controller",
+                    "action": "Camera",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "709f96a5-9868-4d40-8cc4-b2896e6cff4a",
+                    "path": "<Mouse>/delta",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "keyboard and mouse",
+                    "action": "Camera",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": [
+        {
+            "name": "Controller",
+            "bindingGroup": "Controller",
+            "devices": []
+        },
+        {
+            "name": "keyboard and mouse",
+            "bindingGroup": "keyboard and mouse",
+            "devices": []
+        }
+    ]
+}

@@ -5,38 +5,65 @@ using UnityEngine.InputSystem;
 
 public class PlayerContoller : MonoBehaviour
 {
-    private CharacterController characterController;
+    public CharacterController characterController;
+    public EnemyPathfinding enemyPath;
 
-    public float Speed = 5f;
-    // Start is called before the first frame update
+    public float speed = 12f;
+    public float gravity = -9.81f;
+    public float jumpHeight = 3f;
 
-    PlayerControlls controls;
-    Vector2 move;
+    public Transform groundCheck;
+    public float groundDistance = 0.4f;
+    public LayerMask groundMask;
 
-    private void Awake()
+    Vector3 velocity;
+    bool isGrounded;
+
+
+    private void Start()
     {
-        controls = new PlayerControlls();
-        controls.Gameplay.Movement.performed += ctx => move = ctx.ReadValue<Vector2>();
-        controls.Gameplay.Movement.canceled += ctx => move = Vector2.zero;
+       GameObject enemy = GameObject.FindWithTag("enemy");
 
-    }
-
-    void Start()
-    {
-       // characterController = GetComponent<CharacterController>();
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-       // Vector3 move = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
-       // characterController.Move(move * Time.deltaTime * Speed);
-
-        Vector2 m = new Vector2(move.x, move.y) * Time.deltaTime;
-        transform.Translate(m * Speed,Space.World);
-        if (move != Vector2.zero)
+        if (enemy != null)
         {
-            Debug.Log(move);
+            enemyPath = enemy.GetComponent<EnemyPathfinding>();
+        }
+
+    }
+
+    private void Update()
+    {
+        isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
+
+        if(isGrounded && velocity.y < 0)
+        {
+            velocity.y = -2f;
+        }
+
+        float x = Input.GetAxis("Horizontal");
+        float z = Input.GetAxis("Vertical");
+
+        Vector3 move = transform.right * x + transform.forward * z;
+
+        characterController.Move(move * speed * Time.deltaTime);
+
+        if (Input.GetButtonDown("Jump") && isGrounded)
+        {
+            velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+        }
+
+        velocity.y += gravity * Time.deltaTime; 
+        characterController.Move(velocity * Time.deltaTime);
+       
+        
+        if (Input.GetButton("Fire1"))
+        {
+            if (enemyPath.HitStunned == false)
+            {
+                enemyPath.HitStunned = true;
+                Debug.Log("STUNNING");
+            }
         }
     }
+
 }

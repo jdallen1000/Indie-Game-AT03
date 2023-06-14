@@ -24,7 +24,8 @@ public class EnemyPathfinding : MonoBehaviour
 
 	float idleTimer;
 	float StunTimer;
-	bool HitStuned = false;
+	public bool HitStunned = false;
+	public bool inChaseState = false;
 	[SerializeField] Vector3 GeneratedNavPoint;
 
 
@@ -254,13 +255,13 @@ public class EnemyPathfinding : MonoBehaviour
 
 		public override void OnUpdate()
 		{
-			if (Vector3.Distance(instance.transform.position, instance.player.transform.position) < instance.detectionDistance)
-			{
-				instance.agent.SetDestination(instance.player.transform.position);
-			}
-			else if (instance.HitStuned)
+			if (instance.HitStunned)
 			{
 				instance.StateMachine.SetState(new StunState(instance));
+			}
+			else if (Vector3.Distance(instance.transform.position, instance.player.transform.position) < instance.detectionDistance)
+			{
+				instance.agent.SetDestination(instance.player.transform.position);
 			}
 			else
 			{
@@ -292,14 +293,17 @@ public class EnemyPathfinding : MonoBehaviour
 
 			instance.animC.SetTrigger("Stun");
 			instance.StunTimer = 3.5f;
-			Debug.Log(instance.idleTimer);
+			Debug.Log(instance.StunTimer);
+
+			instance.inChaseState = true;
 		}
 
 		public override void OnUpdate()
 		{
 			if (instance.StunTimer <= 0)
 			{
-				instance.StateMachine.SetState(new IdleState(instance));
+				instance.HitStunned = false;
+				instance.StateMachine.SetState(new WanderState(instance));
 			}
 			else if (instance.StunTimer > 0)
 			{
@@ -310,6 +314,7 @@ public class EnemyPathfinding : MonoBehaviour
 		public override void OnExit()
 		{
 			instance.animC.ResetTrigger("Stun");
+			instance.inChaseState = false;
 		}
 	}
 
