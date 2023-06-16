@@ -55,15 +55,6 @@ public class PlayerContoller : MonoBehaviour
         velocity.y += gravity * Time.deltaTime; 
         characterController.Move(velocity * Time.deltaTime);
        
-        
-        if (Input.GetButton("Fire1"))
-        {
-            if (enemyPath.HitStunned == false)
-            {
-                enemyPath.HitStunned = true;
-                Debug.Log("STUNNING");
-            }
-        }
     }
 
 }

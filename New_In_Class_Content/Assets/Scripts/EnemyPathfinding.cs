@@ -11,7 +11,7 @@ public class EnemyPathfinding : MonoBehaviour
 
 	//object the Ai is trying to get to 
 	[SerializeField] GameObject[] navPoint;
-	[SerializeField] GameObject TargetNavPoint;
+	[SerializeField] GameObject targetNavPoint;
 
 	[SerializeField] GameObject player;
 
@@ -23,10 +23,10 @@ public class EnemyPathfinding : MonoBehaviour
 		  walkSpeed;
 
 	float idleTimer;
-	float StunTimer;
-	public bool HitStunned = false;
+	float stunTimer;
+	public bool hitStunned = false;
 	public bool inChaseState = false;
-	[SerializeField] Vector3 GeneratedNavPoint;
+	[SerializeField] Vector3 generatedNavPoint;
 
 
 	public StateMachine StateMachine { get; private set; }
@@ -152,7 +152,7 @@ public class EnemyPathfinding : MonoBehaviour
 			instance.agent.speed = instance.walkSpeed;
 
 			instance.RandomNavmeshLocation(instance.detectionDistance * 2);
-			Debug.Log(instance.GeneratedNavPoint);
+			Debug.Log(instance.generatedNavPoint);
 
 			instance.animC.SetTrigger("Walk");
 
@@ -167,9 +167,9 @@ public class EnemyPathfinding : MonoBehaviour
 			{
 				instance.StateMachine.SetState(new ChaseState(instance));
 			}
-			else if (Vector3.Distance(instance.transform.position, instance.GeneratedNavPoint) > instance.stoppingDistance)
+			else if (Vector3.Distance(instance.transform.position, instance.generatedNavPoint) > instance.stoppingDistance)
 			{
-				instance.agent.SetDestination(instance.GeneratedNavPoint);
+				instance.agent.SetDestination(instance.generatedNavPoint);
 			}
 			else
 			{
@@ -203,7 +203,7 @@ public class EnemyPathfinding : MonoBehaviour
 			instance.agent.speed = instance.walkSpeed;
 
 			instance.animC.SetTrigger("Walk");
-			instance.TargetNavPoint = instance.navPoint[Random.Range(0, instance.navPoint.Length)];
+			instance.targetNavPoint = instance.navPoint[Random.Range(0, instance.navPoint.Length)];
 		}
 
 		public override void OnUpdate()
@@ -215,9 +215,9 @@ public class EnemyPathfinding : MonoBehaviour
 			{
 				instance.StateMachine.SetState(new ChaseState(instance));
 			}
-			else if (Vector3.Distance(instance.transform.position, instance.TargetNavPoint.transform.position) > instance.stoppingDistance)
+			else if (Vector3.Distance(instance.transform.position, instance.targetNavPoint.transform.position) > instance.stoppingDistance)
 			{
-				instance.agent.SetDestination(instance.TargetNavPoint.transform.position);
+				instance.agent.SetDestination(instance.targetNavPoint.transform.position);
 			}
 			else
 			{
@@ -255,7 +255,7 @@ public class EnemyPathfinding : MonoBehaviour
 
 		public override void OnUpdate()
 		{
-			if (instance.HitStunned)
+			if (instance.hitStunned)
 			{
 				instance.StateMachine.SetState(new StunState(instance));
 			}
@@ -292,22 +292,22 @@ public class EnemyPathfinding : MonoBehaviour
 			instance.agent.isStopped = true;
 
 			instance.animC.SetTrigger("Stun");
-			instance.StunTimer = 3.5f;
-			Debug.Log(instance.StunTimer);
+			instance.stunTimer = 3.5f;
+			Debug.Log(instance.stunTimer);
 
 			instance.inChaseState = true;
 		}
 
 		public override void OnUpdate()
 		{
-			if (instance.StunTimer <= 0)
+			if (instance.stunTimer <= 0)
 			{
-				instance.HitStunned = false;
-				instance.StateMachine.SetState(new WanderState(instance));
+				instance.hitStunned = false;
+				instance.StateMachine.SetState(new IdleState(instance));
 			}
-			else if (instance.StunTimer > 0)
+			else if (instance.stunTimer > 0)
 			{
-				instance.StunTimer -= 1 * Time.deltaTime;
+				instance.stunTimer -= 1 * Time.deltaTime;
 			}
 		}
 
@@ -315,6 +315,7 @@ public class EnemyPathfinding : MonoBehaviour
 		{
 			instance.animC.ResetTrigger("Stun");
 			instance.inChaseState = false;
+			instance.hitStunned = false;
 		}
 	}
 
@@ -332,9 +333,9 @@ public class EnemyPathfinding : MonoBehaviour
 		NavMeshHit hit;
 		if (NavMesh.SamplePosition(randomDirection, out hit, radius, 1))
 		{
-			GeneratedNavPoint = hit.position;
+			generatedNavPoint = hit.position;
 		}
-		return GeneratedNavPoint;
+		return generatedNavPoint;
 	}
 }
 
